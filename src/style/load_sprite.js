@@ -2,7 +2,7 @@
 
 const ajax = require('../util/ajax');
 const browser = require('../util/browser');
-const {normalizeSpriteURL} = require('../util/mapbox');
+const {normalizeSpriteURL, isMapboxURL} = require('../util/mapbox');
 const {RGBAImage} = require('../util/image');
 
 import type {StyleImage} from './style_image';
@@ -15,7 +15,8 @@ module.exports = function(baseURL: string,
     let json: any, image, error;
     const format = browser.devicePixelRatio > 1 ? '@2x' : '';
 
-    ajax.getJSON(transformRequestCallback(normalizeSpriteURL(baseURL, format, '.json'), ajax.ResourceType.SpriteJSON), (err, data) => {
+    let spriteJSONUrl = isMapboxURL(baseURL) ? transformRequestCallback(normalizeSpriteURL(baseURL, format, '.json'), ajax.ResourceType.SpriteJSON) : { url: `${baseURL}.json` };
+    ajax.getJSON(spriteJSONUrl, (err, data) => {
         if (!error) {
             error = err;
             json = data;
@@ -23,7 +24,8 @@ module.exports = function(baseURL: string,
         }
     });
 
-    ajax.getImage(transformRequestCallback(normalizeSpriteURL(baseURL, format, '.png'), ajax.ResourceType.SpriteImage), (err, img) => {
+    let spritePNGUrl = isMapboxURL(baseURL) ? transformRequestCallback(normalizeSpriteURL(baseURL, format, '.png'), ajax.ResourceType.SpriteImage) : { url: `${baseURL}.png` };
+    ajax.getImage(spritePNGUrl, (err, img) => {
         if (!error) {
             error = err;
             image = img;
